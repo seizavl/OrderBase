@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"fmt"
-	"gotest/models"
 	"net/http"
+	"orderbase/models"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -81,7 +81,6 @@ func (h *ProductHandler) GetMyProducts(c *gin.Context) {
 		return
 	}
 
-	// 商品が0件でも正常レスポンスとして返す
 	c.JSON(http.StatusOK, products)
 }
 

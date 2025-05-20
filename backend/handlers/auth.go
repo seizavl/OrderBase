@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"gotest/models"
 	"net/http"
+	"orderbase/models"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"

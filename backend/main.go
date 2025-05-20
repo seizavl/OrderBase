@@ -2,8 +2,8 @@
 package main
 
 import (
-	"gotest/handlers"
-	"gotest/models"
+	"orderbase/handlers"
+	"orderbase/models"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -35,7 +35,7 @@ func initDB() {
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
-
+	r.Static("/html", "./static")
 	// セッションの設定
 	store := cookie.NewStore([]byte("secret"))
 	store.Options(sessions.Options{
@@ -60,6 +60,7 @@ func setupRouter() *gin.Engine {
 	authHandler := &handlers.AuthHandler{DB: db}
 	productHandler := &handlers.ProductHandler{DB: db}
 
+	r.Static("/html", "./static")
 	api := r.Group("/api")
 	{
 		api.POST("/register", authHandler.RegisterUser)
@@ -77,8 +78,8 @@ func setupRouter() *gin.Engine {
 			}
 			c.JSON(200, users)
 		})
-
-		// 商品登録・取得・削除
+		api.GET("/html/list", handlers.ListHTMLFiles)
+		api.PUT("/html/save/:page", handlers.SaveHTMLPage)
 		api.POST("/products/upload", productHandler.AddProductWithImage)
 		api.DELETE("/products/:id", productHandler.DeleteProduct)
 		api.GET("/products/mine", productHandler.GetMyProducts)
