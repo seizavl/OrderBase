@@ -36,12 +36,16 @@ OrderBase は、**誰でも・無料で・簡単に使える**ことを前提に
 OrderBase は、
 愛情ある料理にふさわしい UI を、誰でも簡単に作れる環境を目指します。
 
-# フロントエンドの起動（Next.js）
+## フロントエンドの起動（Next.js）
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
-# バックエンドの起動（Go + Gin）
+## バックエンドの起動（Go + Gin）
+```bash
 cd backend
 go mod tidy
 go run main.go
+```
