@@ -11,8 +11,11 @@ out/
 *.test
 *.out
 
-# === OS / エディタごみファイル ===
+# === OS ===
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+# SQLite DB
+*.db
