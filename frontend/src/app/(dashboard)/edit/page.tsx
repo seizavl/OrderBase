@@ -4,6 +4,8 @@ import { useState } from 'react';
 import SaveModal from './SaveModal';
 import ChatWindow from './ChatWindow';
 import HtmlPreview from './HtmlPreview';
+import HtmlViewerPanel from './html-viewer-panel';
+import { Monitor } from 'lucide-react';
 type Message = {
   role: 'user' | 'assistant';
   content: string;
@@ -49,7 +51,7 @@ export default function EditPage() {
       <h1 className="text-2xl font-bold text-gray-800 mb-4">表示・編集ページ</h1>
       <p className="text-gray-600 mb-6">ここではデータの表示やAIとのチャット編集ができます。</p>
 
-      <HtmlPreview htmlPreview={htmlPreview} onSaveClick={() => setSaveModalOpen(true)} />
+      <HtmlViewerPanel html={htmlPreview} title="HTMLビューア 1" icon={Monitor} viewerId={1} />
       {saveModalOpen && (
         <SaveModal
           savePath={savePath}
