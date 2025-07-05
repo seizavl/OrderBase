@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react';
+import { htmlSnippets } from './htmlSnippets';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -35,17 +36,16 @@ export default function ChatWindow({ messages, setMessages, setHtmlPreview, isLo
     setIsLoading(true);
 
     setTimeout(() => {
-      let response = '';
       const userInput = input.toLowerCase();
+      let response = '';
 
       if (userInput.includes('メニュー')) {
-        response = '以下がメニューのHTMLです：\n\n```html\n<ul>\n  <li>ラーメン3</li>\n  <li>餃子</li>\n  <li>チャーハン</li>\n</ul>\n```';
+        const randomHtml = htmlSnippets[Math.floor(Math.random() * htmlSnippets.length)];
+        setHtmlPreview(randomHtml);
+        response = '以下がランダムに選ばれたHTMLです：\n\n' + randomHtml;
       } else {
         response = 'HTMLやCSSについて質問してください！';
       }
-
-      const match = response.match(/```html\n([\s\S]*?)```/);
-      if (match) setHtmlPreview(match[1]);
 
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
       setIsLoading(false);

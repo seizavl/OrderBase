@@ -60,7 +60,6 @@ func setupRouter() *gin.Engine {
 	authHandler := &handlers.AuthHandler{DB: db}
 	productHandler := &handlers.ProductHandler{DB: db}
 
-	r.Static("/html", "./static")
 	api := r.Group("/api")
 	{
 		api.POST("/register", authHandler.RegisterUser)
