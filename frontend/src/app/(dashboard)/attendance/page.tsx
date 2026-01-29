@@ -1,9 +1,13 @@
 'use client'
 export default function AttendancePage() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-gray-800">勤怠管理</h1>
-      <p className="mt-2 text-gray-600">勤怠情報の管理ができます。</p>
+    <div className="h-full overflow-auto p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-200">
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">勤怠管理</h1>
+          <p className="text-gray-600">勤怠情報の管理ができます。</p>
+        </div>
+      </div>
     </div>
   )
 }

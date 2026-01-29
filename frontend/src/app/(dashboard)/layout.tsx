@@ -6,13 +6,16 @@ import { usePathname, useRouter } from 'next/navigation'
 import axios from 'axios'
 import Sidebar from '@/components/Sidebar'
 import Header from '@/components/Header'
+import { ToastProvider } from '@/components/ToastContainer'
 
 const tabTitles: Record<string, string> = {
   '/dashboard': 'マイダッシュボード',
   '/edit': '表示・編集ページ',
+  '/html-viewer': 'HTMLビューア',
   '/reservations': '予約確認',
   '/products': '商品登録',
   '/attendance': '勤怠管理',
+  '/settings': '設定',
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -53,17 +56,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <html lang="ja">
-      <body className="bg-gray-50">
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <div className="flex-1 flex flex-col">
-            <Header username={username} title={title} />
-            <main className="flex-1 bg-white p-8">{children}</main>
-            <footer className="bg-white shadow-inner py-4 mt-auto text-center text-sm text-gray-500">
-              © 2025 あなたのサービス名
-            </footer>
+      <body className="bg-white">
+        <ToastProvider>
+          <div className="flex h-screen">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Header username={username} title={title} />
+              <main className="flex-1 overflow-hidden">{children}</main>
+            </div>
           </div>
-        </div>
+        </ToastProvider>
       </body>
     </html>
   )

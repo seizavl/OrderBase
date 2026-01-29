@@ -11,6 +11,7 @@ type Product struct {
 	Name      string    `json:"name"`
 	Price     int       `json:"price"`
 	ImagePath string    `json:"imagePath"`
+	Labels    string    `json:"labels"` // カンマ区切りのラベル（例: "新商品,人気,セール"）
 	UserID    uint      `json:"userId"`
 	User      User      `json:"user"`
 }

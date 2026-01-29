@@ -7,9 +7,11 @@ import TagList from './Taglist';
 import ProductCard from './ProductCard';
 import ProductDetailModal from './ProductDetailModal';
 import ProductRegisterModal from './ProductRegisterModal';
+import { useToast } from '@/components/ToastContainer';
 
 
 export default function ProductListPage() {
+  const { showToast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [error, setError] = useState('');
@@ -27,9 +29,13 @@ export default function ProductListPage() {
           setError(data.length === 0 ? '商品がありません' : '');
         } else {
           setError(data.error || '取得失敗');
+          showToast(data.error || '取得失敗', 'error');
         }
       })
-      .catch(() => setError('通信エラー'));
+      .catch(() => {
+        setError('通信エラー');
+        showToast('通信エラー', 'error');
+      });
   };
   useEffect(() => {
     fetchProducts();
@@ -42,48 +48,55 @@ export default function ProductListPage() {
       credentials: 'include',
     });
     if (res.ok) {
-      alert('削除しました');
+      showToast('削除しました', 'success');
       setSelectedProduct(null);
       fetchProducts();
     } else {
-      alert('削除に失敗しました');
+      showToast('削除に失敗しました', 'error');
     }
   };
 
   return (
-    <div className="p-6">
+    <div className="h-full overflow-auto p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-200">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold text-gray-800">登録済み商品</h1>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all shadow-sm hover:shadow-md font-medium"
+            >
+              ＋ 新規登録
+            </button>
+          </div>
 
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">登録済み商品</h1>
-        <button onClick={() => setShowModal(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-          ＋ 新規登録
-        </button>
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {products.map(product => (
+              <ProductCard key={product.id} product={product} onClick={() => setSelectedProduct(product)} />
+            ))}
+          </div>
+        </div>
+
+        {selectedProduct && (
+          <ProductDetailModal
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            onDelete={handleDelete}
+            onUpdate={fetchProducts}
+          />
+        )}
+
+        {showModal && (
+          <ProductRegisterModal
+            onClose={() => setShowModal(false)}
+            onSuccess={() => {
+              fetchProducts();
+            }}
+          />
+        )}
       </div>
-
-      {error && <p className="text-red-500">{error}</p>}
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {products.map(product => (
-          <ProductCard key={product.id} product={product} onClick={() => setSelectedProduct(product)} />
-        ))}
-      </div>
-
-      {selectedProduct && (
-        <ProductDetailModal
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          onDelete={handleDelete}
-        />
-      )}
-
-      {showModal && (
-        <ProductRegisterModal
-          onClose={() => setShowModal(false)}
-          onSuccess={() => {
-            fetchProducts();
-          }}
-        />
-      )}
     </div>
   );
 }

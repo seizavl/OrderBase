@@ -27,12 +27,26 @@ export default function ProductCard({ product, onClick }: { product: Product; on
           <h2 className="text-xl font-medium tracking-tight text-gray-800 drop-shadow-sm">
             {product.name}
           </h2>
-          
+
+          {/* ラベル表示 */}
+          {product.labels && product.labels.trim() !== '' && (
+            <div className="flex flex-wrap gap-1.5">
+              {product.labels.split(',').map((label, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-0.5 text-xs font-medium bg-blue-500/80 text-white rounded-full backdrop-blur-sm"
+                >
+                  {label.trim()}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className="flex justify-between items-center">
             <p className="text-gray-700 font-semibold text-lg">
               {product.price} <span className="text-sm font-normal">円</span>
             </p>
-            
+
             <div className="h-6 w-6 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center group-hover:bg-white/50 transition-colors duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />

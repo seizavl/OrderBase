@@ -1,17 +1,20 @@
 //! components/ProductRegisterModal.tsx
 import React, { useState } from 'react';
+import { useToast } from '@/components/ToastContainer';
 
 export default function ProductRegisterModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const { showToast } = useToast();
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [tagInput, setTagInput] = useState('');
+  const [labels, setLabels] = useState('');
   const [message, setMessage] = useState('');
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!image) {
-      setMessage('画像を選択してください');
+      showToast('画像を選択してください', 'warning');
       return;
     }
     const tagList = tagInput.split(',').map(tag => tag.trim()).filter(Boolean);
@@ -20,6 +23,7 @@ export default function ProductRegisterModal({ onClose, onSuccess }: { onClose: 
     formData.append('price', price);
     formData.append('image', image);
     formData.append('tags', JSON.stringify(tagList));
+    formData.append('labels', labels);
     const res = await fetch('http://localhost:8080/api/products/upload', {
       method: 'POST',
       body: formData,
@@ -27,11 +31,11 @@ export default function ProductRegisterModal({ onClose, onSuccess }: { onClose: 
     });
     const data = await res.json();
     if (res.ok) {
-      setMessage('登録完了');
+      showToast('商品を登録しました', 'success');
       onClose();
       onSuccess();
     } else {
-      setMessage(data.error || '登録失敗');
+      showToast(data.error || '登録失敗', 'error');
     }
   };
 
@@ -53,7 +57,18 @@ export default function ProductRegisterModal({ onClose, onSuccess }: { onClose: 
             <label className="block font-medium">画像</label>
             <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files?.[0] || null)} className="w-full" required />
           </div>
-          
+          <div>
+            <label className="block font-medium">ラベル（カンマ区切り）</label>
+            <input
+              type="text"
+              value={labels}
+              onChange={(e) => setLabels(e.target.value)}
+              className="border rounded px-2 py-1 w-full"
+              placeholder="例: 新商品,人気,セール"
+            />
+            <p className="text-xs text-gray-500 mt-1">複数のラベルはカンマで区切ってください</p>
+          </div>
+
           <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">登録</button>
           {message && <p className="text-sm text-red-500">{message}</p>}
         </form>

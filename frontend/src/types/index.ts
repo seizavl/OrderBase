@@ -4,6 +4,7 @@ export type Product = {
   name: string;
   price: number;
   imagePath: string;
+  labels?: string;
 };
 
 export type Tag = {

@@ -23,6 +23,8 @@ export default function RegisterPage() {
       const res = await axios.post('http://localhost:8080/api/register', {
         username,
         password
+      }, {
+        withCredentials: true
       })
       setSuccess('登録成功')
       setTimeout(() => {

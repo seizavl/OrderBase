@@ -30,6 +30,7 @@ func (h *ProductHandler) AddProductWithImage(c *gin.Context) {
 
 	name := c.PostForm("name")
 	priceStr := c.PostForm("price")
+	labels := c.PostForm("labels")
 
 	file, err := c.FormFile("image")
 	if err != nil {
@@ -50,6 +51,7 @@ func (h *ProductHandler) AddProductWithImage(c *gin.Context) {
 		Name:      name,
 		Price:     price,
 		ImagePath: "/" + imagePath,
+		Labels:    labels,
 		UserID:    user.ID,
 	}
 
@@ -97,5 +99,81 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ユーザー取得失敗"})
 		return
 	}
+
+	productID := c.Param("id")
+
+	// まず商品が存在し、かつユーザーの所有物であることを確認
+	var product models.Product
+	if err := h.DB.First(&product, productID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "商品が見つかりません"})
+		return
+	}
+
+	// 所有者チェック
+	if product.UserID != user.ID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "他のユーザーの商品は削除できません"})
+		return
+	}
+
+	// 削除実行
+	if err := h.DB.Delete(&product).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "削除失敗"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "削除完了"})
+}
+
+func (h *ProductHandler) UpdateProduct(c *gin.Context) {
+	session := sessions.Default(c)
+	username := session.Get("user")
+	if username == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未ログイン"})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("username = ?", username.(string)).First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "ユーザー取得失敗"})
+		return
+	}
+
+	productID := c.Param("id")
+
+	// 商品が存在し、かつユーザーの所有物であることを確認
+	var product models.Product
+	if err := h.DB.First(&product, productID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "商品が見つかりません"})
+		return
+	}
+
+	// 所有者チェック
+	if product.UserID != user.ID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "他のユーザーの商品は編集できません"})
+		return
+	}
+
+	// フォームデータを取得
+	name := c.PostForm("name")
+	priceStr := c.PostForm("price")
+	labels := c.PostForm("labels")
+
+	// 更新
+	if name != "" {
+		product.Name = name
+	}
+	if priceStr != "" {
+		var price int
+		fmt.Sscanf(priceStr, "%d", &price)
+		product.Price = price
+	}
+	// ラベルは空文字列も許可（削除できるように）
+	product.Labels = labels
+
+	if err := h.DB.Save(&product).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "更新失敗"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "更新完了", "product": product})
 }
