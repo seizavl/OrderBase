@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { Trash2 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface HTMLPage {
   id: number;
@@ -160,18 +161,27 @@ export default function HTMLViewerPage() {
                   </div>
                 ) : selectedPage ? (
                   <div className="border rounded-lg p-4 bg-gray-50">
-                    <div className="mb-4 flex items-center justify-between">
+                    <div className="mb-4 flex items-center justify-between flex-wrap gap-4">
                       <span className="text-sm text-gray-700 font-medium">
                         作成: {new Date(selectedPage.created_at).toLocaleString('ja-JP')}
                       </span>
-                      <a
-                        href={`http://localhost:8080/html/view/${username}/${selectedPage.name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 hover:underline text-sm font-medium"
-                      >
-                        新しいタブで開く
-                      </a>
+                      <div className="flex items-center gap-4">
+                        <a
+                          href={`http://100.110.79.39:8080/html/view/${username}/${selectedPage.name}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-700 hover:underline text-sm font-medium"
+                        >
+                          新しいタブで開く
+                        </a>
+                        <div className="bg-white p-2 rounded-lg border border-gray-300">
+                          <QRCodeSVG
+                            value={`http://100.110.79.39:8080/html/view/${username}/${selectedPage.name}`}
+                            size={100}
+                            level="M"
+                          />
+                        </div>
+                      </div>
                     </div>
                     {/* HTMLコンテンツをレンダリング */}
                     <div className="bg-white rounded border overflow-hidden">

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import '@/app/globals.css'
 import { usePathname, useRouter } from 'next/navigation'
 import axios from 'axios'
 import Sidebar from '@/components/Sidebar'
@@ -44,29 +43,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <html lang="ja">
-        <body className="bg-gray-50 flex justify-center items-center min-h-screen">
-          <p className="text-gray-500 text-sm">ユーザー情報取得中...</p>
-        </body>
-      </html>
+      <div className="bg-gray-50 flex justify-center items-center min-h-screen">
+        <p className="text-gray-500 text-sm">ユーザー情報取得中...</p>
+      </div>
     )
   }
 
   const title = tabTitles[pathname] ?? 'ダッシュボード'
 
   return (
-    <html lang="ja">
-      <body className="bg-white">
-        <ToastProvider>
-          <div className="flex h-screen">
-            <Sidebar />
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <Header username={username} title={title} />
-              <main className="flex-1 overflow-hidden">{children}</main>
-            </div>
-          </div>
-        </ToastProvider>
-      </body>
-    </html>
+    <ToastProvider>
+      <div className="flex h-screen bg-white">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header username={username} title={title} />
+          <main className="flex-1 overflow-hidden">{children}</main>
+        </div>
+      </div>
+    </ToastProvider>
   )
 }

@@ -10,7 +10,7 @@ type Props = {
 export default function Header({ username, title }: Props) {
   return (
     <header className="bg-white/80 backdrop-blur-sm shadow-md border-b border-gray-200">
-      <div className="px-6 py-4 flex justify-between items-center">
+      <div className="px-6 py-3 flex justify-between items-center">
         {/* タイトル・アイコン */}
         <div className="flex items-center">
           <Home className="h-6 w-6 text-blue-600" />

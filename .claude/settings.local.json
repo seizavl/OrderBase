@@ -10,7 +10,8 @@
       "Bash(backend.exe)",
       "Bash(.backend.exe)",
       "Bash(timeout /t 2 /nobreak)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
