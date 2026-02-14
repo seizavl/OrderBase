@@ -11,7 +11,7 @@ export default function UsersPage() {
       withCredentials: true
     })
       .then(res => setUsers(res.data))
-      .catch(err => console.error('ユーザー一覧取得失敗', err))
+      .catch(err => {})
   }, [])
 
   return (

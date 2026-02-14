@@ -30,7 +30,7 @@ func initDB() {
 		panic("DB接続失敗")
 	}
 	// Tag関連を除外し、ProductはJSON形式のtagsで管理
-	db.AutoMigrate(&models.User{}, &models.Product{}, &models.HTMLPage{}, &models.Order{}, &models.CartItem{})
+	db.AutoMigrate(&models.User{}, &models.Product{}, &models.HTMLPage{}, &models.Order{}, &models.CartItem{}, &models.Table{})
 
 }
 
@@ -70,6 +70,7 @@ func setupRouter() *gin.Engine {
 	productHandler := &handlers.ProductHandler{DB: db}
 	htmlHandler := &handlers.HTMLHandler{DB: db}
 	openaiHandler := &handlers.OpenAIHandler{DB: db}
+	tableHandler := &handlers.TableHandler{DB: db}
 
 	api := r.Group("/api")
 	{
@@ -99,6 +100,18 @@ func setupRouter() *gin.Engine {
 		api.POST("/openai/chat", openaiHandler.ChatCompletion)
 		api.POST("/openai/set-key", authHandler.SetOpenAIKey)
 		api.GET("/openai/get-key", authHandler.GetOpenAIKey)
+
+		// メインメニュー設定API
+		api.PATCH("/user/main-menu", authHandler.SetMainMenu)
+		api.GET("/user/main-menu", authHandler.GetMainMenu)
+
+		// テーブル管理API
+		api.POST("/tables", tableHandler.CreateTable)
+		api.GET("/tables", tableHandler.GetTables)
+		api.GET("/tables/:id", tableHandler.GetTableByID)
+		api.PATCH("/tables/:id", tableHandler.UpdateTable)
+		api.DELETE("/tables/:id", tableHandler.DeleteTable)
+		api.GET("/tables/:id/orders", tableHandler.GetTableOrders)
 
 		// 商品関連API
 		api.POST("/products/upload", productHandler.AddProductWithImage)

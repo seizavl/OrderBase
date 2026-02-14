@@ -22,7 +22,6 @@ export default function UserDropdown({ username }: { username: string }) {
       await axios.get('http://localhost:8080/api/logout', { withCredentials: true })
       router.push('/login')
     } catch (err) {
-      console.error('ログアウト失敗', err)
     }
   }
 

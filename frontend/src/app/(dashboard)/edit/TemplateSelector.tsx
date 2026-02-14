@@ -145,15 +145,12 @@ export default function TemplateSelector({ onComplete, onBack }: TemplateSelecto
 
   const handleNext = () => {
     if (currentStep === 1 && !selection.layout) {
-      alert('レイアウトを選択してください');
       return;
     }
     if (currentStep === 2 && !selection.theme) {
-      alert('配色テーマを選択してください');
       return;
     }
     if (currentStep === 3 && !selection.purpose) {
-      alert('用途を選択してください');
       return;
     }
 

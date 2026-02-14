@@ -24,13 +24,11 @@ export default function SettingsPage() {
         setMaskedKey(data.masked_key || '');
       }
     } catch (error) {
-      console.error('APIキー取得エラー:', error);
     }
   };
 
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
-      alert('APIキーを入力してください');
       return;
     }
 
@@ -44,16 +42,11 @@ export default function SettingsPage() {
       });
 
       if (res.ok) {
-        alert('APIキーを保存しました');
         setApiKey('');
         setShowKey(false);
         fetchApiKey();
-      } else {
-        const error = await res.json();
-        alert(`保存失敗: ${error.error}`);
       }
     } catch (error) {
-      alert('通信エラー: 保存に失敗しました');
     } finally {
       setSaving(false);
     }

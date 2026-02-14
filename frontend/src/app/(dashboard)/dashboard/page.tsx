@@ -58,7 +58,6 @@ export default function DashboardPage() {
           setStats(data)
         }
       } catch (error) {
-        console.error('統計情報の取得に失敗:', error)
       } finally {
         setLoading(false)
       }

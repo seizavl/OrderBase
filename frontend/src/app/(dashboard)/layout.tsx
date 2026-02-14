@@ -22,6 +22,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter()
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(true)
+  const [isInitialRender, setIsInitialRender] = useState(true)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -31,7 +32,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         })
         setUsername(res.data.username)
       } catch (err) {
-        console.error('ユーザー取得失敗', err)
         router.push('/login')
       } finally {
         setLoading(false)
@@ -40,6 +40,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     fetchUser()
   }, [router])
+
+  // パスが変更されたら初回レンダリングフラグをfalseに
+  useEffect(() => {
+    if (!loading) {
+      setIsInitialRender(false)
+    }
+  }, [pathname, loading])
 
   if (loading) {
     return (
@@ -57,7 +64,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header username={username} title={title} />
-          <main className="flex-1 overflow-hidden">{children}</main>
+          <main className="flex-1 overflow-hidden">
+            <div key={pathname} className={`h-full ${!isInitialRender ? 'animate-fade-up' : ''}`}>
+              {children}
+            </div>
+          </main>
         </div>
       </div>
     </ToastProvider>

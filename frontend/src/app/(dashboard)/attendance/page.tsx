@@ -139,7 +139,7 @@ export default function AttendancePage() {
             <p className="text-gray-600">スタッフの勤怠状況を管理できます</p>
           </div>
           <button
-            onClick={() => alert('CSV出力機能は準備中です')}
+            onClick={() => {}}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Download className="w-5 h-5" />
@@ -313,7 +313,7 @@ export default function AttendancePage() {
                             <td className="px-6 py-4">
                               <div className="flex items-center justify-end gap-2">
                                 <button
-                                  onClick={() => alert('編集機能は準備中です')}
+                                  onClick={() => {}}
                                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                                   title="編集"
                                 >
@@ -346,7 +346,7 @@ export default function AttendancePage() {
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-end gap-2">
                               <button
-                                onClick={() => alert('勤怠登録機能は準備中です')}
+                                onClick={() => {}}
                                 className="px-3 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-600"
                               >
                                 勤怠登録

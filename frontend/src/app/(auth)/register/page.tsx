@@ -44,7 +44,6 @@ export default function RegisterPage() {
         router.push('/login')
       }, 1500)
     } catch (err: any) {
-      console.log(err)
       setError('登録失敗: ユーザー名が既に使用されています')
     } finally {
       setIsLoading(false)

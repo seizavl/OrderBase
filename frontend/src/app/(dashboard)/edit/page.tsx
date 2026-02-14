@@ -42,7 +42,6 @@ export default function EditPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [savePath, setSavePath] = useState('');
-  const [chatVisible, setChatVisible] = useState(false);
   const [username, setUsername] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [pages, setPages] = useState<HTMLPage[]>([]);
@@ -71,7 +70,6 @@ export default function EditPage() {
         try {
           setMessages(JSON.parse(savedMessages));
         } catch (e) {
-          console.error('メッセージ復元エラー:', e);
         }
       }
     }
@@ -104,7 +102,6 @@ export default function EditPage() {
         });
         setUsername(res.data.username);
       } catch (err) {
-        console.error('ユーザー取得失敗', err);
       }
     };
     fetchUser();
@@ -122,7 +119,6 @@ export default function EditPage() {
           setProducts(data);
         }
       } catch (err) {
-        console.error('商品取得失敗', err);
       }
     };
     fetchProducts();
@@ -140,7 +136,6 @@ export default function EditPage() {
           setPages(data.pages || []);
         }
       } catch (err) {
-        console.error('ページリスト取得失敗', err);
       }
     };
     fetchPages();
@@ -159,6 +154,33 @@ export default function EditPage() {
 - \`\`\`html\`\`\`で囲む、説明不要、コードのみ出力
 - 完全なHTML(<!DOCTYPE html>～</html>)
 - 既存コード提示時は保持し追加のみ、削除・置換禁止
+
+【重要：テーブル情報の取得と送信】
+QRコードからアクセスされた場合、URLに table=<テーブル番号> というクエリパラメータが付いています。
+このテーブル番号をJavaScriptで取得して注文時に送信する必要があります。
+
+以下のコードをHTMLに含めてください：
+1. URLからテーブル番号を取得：
+   const params = new URLSearchParams(window.location.search);
+   const tableNumber = params.get('table');
+
+2. checkout関数を修正：
+   async function checkout(tableNumber=null){
+     if(!confirm('注文しますか？'))return;
+     try{
+       const checkoutBody = {};
+       if(tableNumber){
+         checkoutBody.table_id = parseInt(tableNumber);
+       }
+       const r=await fetch(API_BASE+'/api/cart/checkout',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(checkoutBody)});
+       // ... 以下省略
+     }
+   }
+
+3. 購入ボタンでテーブル番号を渡す：
+   <button onclick="const params = new URLSearchParams(window.location.search); const table = params.get('table'); checkout(table);">購入手続きへ</button>
+
+この実装により、テーブルから購入された注文は自動的にそのテーブルに紐付けられます。
 
 【商品情報】
 ${productInfo}
@@ -285,10 +307,8 @@ async function addToCart(id,q=1){
     if(r.ok){
       await loadCart();
       showNotification('カートに追加しました');
-    }else{
-      alert(d.error||'失敗');
     }
-  }catch{alert('エラー')}
+  }catch{}
 }
 
 async function loadCart(){
@@ -330,7 +350,7 @@ function updateCartDisplay(){
         <span style="font-size: 18px; font-weight: bold;">合計</span>
         <span style="font-size: 24px; font-weight: bold; color: #3b82f6;">¥\${cartData.total_price.toLocaleString()}</span>
       </div>
-      <button onclick="checkout()" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);">購入手続きへ</button>
+      <button onclick="const params = new URLSearchParams(window.location.search); const table = params.get('table'); checkout(table);" style="width: 100%; padding: 15px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);">購入手続きへ</button>
     </div>\`;
     itemsEl.innerHTML = html;
   }
@@ -353,19 +373,20 @@ function showNotification(msg){
   setTimeout(() => notif.remove(), 2000);
 }
 
-async function checkout(){
+async function checkout(tableNumber=null){
   if(!confirm('注文しますか？'))return;
   try{
-    const r=await fetch(API_BASE+'/api/cart/checkout',{method:'POST',credentials:'include'});
+    const checkoutBody = {};
+    if(tableNumber){
+      checkoutBody.table_id = parseInt(tableNumber);
+    }
+    const r=await fetch(API_BASE+'/api/cart/checkout',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(checkoutBody)});
     const d=await r.json();
     if(r.ok){
-      alert('注文完了！\\n¥'+d.total_amount.toLocaleString());
       await loadCart();
       toggleCart();
-    }else{
-      alert(d.error||'失敗');
     }
-  }catch{alert('エラー')}
+  }catch{}
 }
 
 document.addEventListener('DOMContentLoaded', loadCart);
@@ -391,7 +412,6 @@ document.addEventListener('DOMContentLoaded', loadCart);
   const handleSaveHtml = async () => {
     const nameToSave = savePath || currentPageName;
     if (!nameToSave || !htmlPreview || !username) {
-      alert('保存ファイル名とHTML内容が必要です');
       return;
     }
 
@@ -406,16 +426,10 @@ document.addEventListener('DOMContentLoaded', loadCart);
       });
 
       if (res.ok) {
-        alert('保存に成功しました！');
         setCurrentPageName(nameToSave);
         setSaveModalOpen(false);
-      } else {
-        const error = await res.json();
-        alert(`保存に失敗しました: ${error.error || res.statusText}`);
       }
     } catch (error) {
-      console.error('保存エラー:', error);
-      alert('通信エラー：保存に失敗しました');
     }
   };
 
@@ -439,7 +453,6 @@ document.addEventListener('DOMContentLoaded', loadCart);
           try {
             setMessages(JSON.parse(savedMessages));
           } catch (e) {
-            console.error('メッセージ復元エラー:', e);
             // 復元失敗時はデフォルトメッセージにリセット
             setMessages([
               { role: 'system', content: messages[0].content },
@@ -453,11 +466,8 @@ document.addEventListener('DOMContentLoaded', loadCart);
             { role: 'assistant', content: 'こんにちは！HTMLについて質問があればお答えします。どのようなHTMLを作成したいですか？' }
           ]);
         }
-      } else {
-        alert('ページの読み込みに失敗しました');
       }
     } catch (error) {
-      alert('通信エラー: ページを読み込めませんでした');
     }
   };
 
@@ -506,12 +516,8 @@ document.addEventListener('DOMContentLoaded', loadCart);
           const htmlCode = htmlMatch[1].trim();
           setHtmlPreview(htmlCode);
         }
-      } else {
-        const error = await res.json();
-        alert(`エラー: ${error.error || '初期HTMLの生成に失敗しました'}`);
       }
     } catch (error) {
-      alert('通信エラー: APIに接続できませんでした');
     } finally {
       setIsLoading(false);
     }
@@ -612,9 +618,7 @@ ${purposeDescriptions[selection.purpose]}
             {/* 既存ページ編集カード */}
             <button
               onClick={() => {
-                if (pages.length === 0) {
-                  alert('保存されたページがありません');
-                } else {
+                if (pages.length > 0) {
                   // ページ選択リストを表示するためのフラグ
                   document.getElementById('page-list')?.scrollIntoView({ behavior: 'smooth' });
                 }
@@ -654,104 +658,109 @@ ${purposeDescriptions[selection.purpose]}
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* ヘッダーバー */}
-      <div className="flex items-center justify-between px-8 py-4 bg-white/95 backdrop-blur-sm border-b border-gray-200">
-        <div className="flex items-center gap-4">
+      {/* ヘッダーバー - より洗練されたデザイン */}
+      <div className="flex items-center justify-between px-8 py-4 bg-white border-b border-gray-200 shadow-sm">
+        {/* 左側: ナビゲーション */}
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setShowPageSelector(true)}
-            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
+            className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2 hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors text-sm"
           >
             <FileEdit className="w-4 h-4" />
-            ページ選択に戻る
+            戻る
           </button>
-          {currentPageName && (
-            <span className="text-gray-600">
-              編集中: <span className="font-semibold text-gray-900">{currentPageName}</span>
-            </span>
-          )}
         </div>
-        <button
-          onClick={resetCurrentWork}
-          className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" />
-          最初からやり直す
-        </button>
-      </div>
 
-      {/* メインコンテンツ */}
-      <div className="flex-1 overflow-auto p-8">
-        <div className="w-full h-full flex items-center justify-center">
-          {isLoading && !htmlPreview ? (
-            // AI生成中のローディング画面
-            <div className="flex flex-col items-center justify-center gap-6">
-              <div className="relative">
-                <div className="w-24 h-24 border-8 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Monitor className="w-10 h-10 text-blue-600" />
-                </div>
-              </div>
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">AIがページを生成中...</h3>
-                <p className="text-gray-600">選択したテンプレートに基づいて、HTMLページを作成しています</p>
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                </div>
-                <span className="text-sm text-blue-700 font-medium">処理中</span>
-              </div>
-            </div>
-          ) : (
-            <div className="w-full max-w-[90%] h-[calc(100vh-200px)]">
-              <HtmlViewerPanel
-                html={htmlPreview}
-                title={currentPageName || "HTMLビューア"}
-                icon={Monitor}
-                viewerId={1}
-                onSave={() => {
-                  if (currentPageName && !savePath) {
-                    setSavePath(currentPageName);
-                  }
-                  setSaveModalOpen(true);
-                }}
-              />
-            </div>
-          )}
+        {/* 中央: 編集中のページ名 */}
+        {currentPageName && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+            <span className="text-sm text-gray-600">編集中:</span>
+            <span className="text-sm font-semibold text-gray-900">{currentPageName}</span>
+          </div>
+        )}
+
+        {/* 右側: アクションボタン */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              if (currentPageName && !savePath) {
+                setSavePath(currentPageName);
+              }
+              setSaveModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-sm hover:shadow-md font-medium text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            保存
+          </button>
+          <button
+            onClick={resetCurrentWork}
+            className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm border border-red-200"
+          >
+            <RotateCcw className="w-4 h-4" />
+            やり直す
+          </button>
         </div>
       </div>
 
-      {/* 右側に重なるチャットウィンドウ */}
-      <div
-        className={`fixed right-0 top-20 w-[420px] h-[calc(100vh-100px)] transition-all duration-300 z-50 ${
-          chatVisible ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        <button
-          onClick={() => setChatVisible(!chatVisible)}
-          className={`absolute -left-12 top-1/2 -translate-y-1/2 bg-slate-800 text-white p-3 rounded-l-xl shadow-lg hover:bg-slate-700 transition-all ${
-            chatVisible ? 'opacity-100' : 'opacity-90 hover:opacity-100'
-          }`}
-        >
-          {chatVisible ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <MessageSquare className="w-5 h-5" />
-          )}
-        </button>
+      {/* メインコンテンツ - シンプルレイアウト */}
+      <div className="flex-1 overflow-hidden relative">
+        {isLoading && !htmlPreview ? (
+          // AI生成中のローディング画面
+          <div className="w-full h-full flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <div className="relative">
+              <div className="w-24 h-24 border-8 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Monitor className="w-10 h-10 text-blue-600" />
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">AIがページを生成中...</h3>
+              <p className="text-gray-600">選択したテンプレートに基づいて、HTMLページを作成しています</p>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+              <span className="text-sm text-blue-700 font-medium">処理中</span>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full h-full p-6 bg-gray-50">
+            <div className="w-full h-full flex gap-6">
+              {/* 左側: iPhone プレビュー */}
+              <div className="flex-1 min-w-0">
+                <HtmlViewerPanel
+                  html={htmlPreview}
+                  title={currentPageName || "HTMLビューア"}
+                  icon={Monitor}
+                  viewerId={1}
+                  onSave={() => {
+                    if (currentPageName && !savePath) {
+                      setSavePath(currentPageName);
+                    }
+                    setSaveModalOpen(true);
+                  }}
+                />
+              </div>
 
-        <div className="h-full pr-6">
-          <ChatWindow
-            messages={messages}
-            setMessages={setMessages}
-            setHtmlPreview={setHtmlPreview}
-            isLoading={isLoading}
-            setIsLoading={setIsLoading}
-            currentHtml={htmlPreview}
-          />
-        </div>
+              {/* 右側: チャットウィンドウ */}
+              <div className="w-96">
+                <ChatWindow
+                  messages={messages}
+                  setMessages={setMessages}
+                  setHtmlPreview={setHtmlPreview}
+                  isLoading={isLoading}
+                  setIsLoading={setIsLoading}
+                  currentHtml={htmlPreview}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {saveModalOpen && (

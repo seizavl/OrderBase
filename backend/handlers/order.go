@@ -75,6 +75,7 @@ func GetOrders(c *gin.Context, db *gorm.DB) {
 	var orders []models.Order
 	if err := db.Preload("Product").
 		Preload("User").
+		Preload("Table").
 		Order("created_at DESC").
 		Find(&orders).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "注文の取得に失敗しました"})

@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react';
-import { Code, Image as ImageIcon, X } from 'lucide-react';
+import { Code, Image as ImageIcon, Scale, X } from 'lucide-react';
 
 interface MessageContent {
   type: 'text' | 'image_url';
@@ -112,10 +112,7 @@ export default function ChatWindow({ messages, setMessages, setHtmlPreview, isLo
         const htmlMatch = content.match(/```html\s*\n?([\s\S]*?)```/);
         if (htmlMatch) {
           const htmlCode = htmlMatch[1].trim();
-          console.log('Extracted HTML:', htmlCode); // デバッグ用
           setHtmlPreview(htmlCode);
-        } else {
-          console.log('No HTML code block found in:', content); // デバッグ用
         }
       } else {
         const error = await res.json();
@@ -187,7 +184,7 @@ export default function ChatWindow({ messages, setMessages, setHtmlPreview, isLo
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col" style={{scale: "0.9" }}>
       <div className="relative w-full h-full">
         <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200 h-full flex flex-col">
           <div className="rounded-xl overflow-hidden flex flex-col h-full bg-gray-50">

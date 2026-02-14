@@ -1,6 +1,6 @@
 'use client'
 import { usePathname, useRouter } from 'next/navigation'
-import { ClipboardList, Calendar, Package, Clock, LayoutGrid, Home, FileText, Settings, ShoppingBag } from 'lucide-react'
+import { ClipboardList, Calendar, Package, Clock, LayoutGrid, Home, FileText, Settings, ShoppingBag, Grid3x3, CreditCard } from 'lucide-react'
 import clsx from 'clsx'
 
 export default function Sidebar() {
@@ -11,7 +11,9 @@ export default function Sidebar() {
     { label: 'ダッシュボード', icon: Home, path: '/dashboard' },
     { label: '表示・編集ページ', icon: ClipboardList, path: '/edit' },
     { label: 'HTMLビューア', icon: FileText, path: '/html-viewer' },
+    { label: 'テーブル管理', icon: Grid3x3, path: '/tables' },
     { label: '注文管理', icon: ShoppingBag, path: '/orders' },
+    { label: '会計処理', icon: CreditCard, path: '/checkout' },
     { label: '予約確認', icon: Calendar, path: '/reservations' },
     { label: '商品登録', icon: Package, path: '/products' },
     { label: '勤怠管理', icon: Clock, path: '/attendance' },

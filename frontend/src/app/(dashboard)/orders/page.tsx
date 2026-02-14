@@ -3,6 +3,13 @@ import { useState, useEffect, useRef } from 'react';
 import { ShoppingBag, Package, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { useToast } from '@/components/ToastContainer';
 
+interface Table {
+  id: number;
+  table_number: number;
+  capacity: number;
+  status: string;
+}
+
 interface Order {
   id: number;
   product_id: number;
@@ -10,12 +17,14 @@ interface Order {
   total_price: number;
   status: string;
   created_at: string;
+  table_id?: number;
   product?: {
     id: number;
     name: string;
     price: number;
     imagePath: string;
   };
+  table?: Table;
 }
 
 export default function OrdersPage() {
@@ -54,7 +63,6 @@ export default function OrdersPage() {
         setOrders(newOrders);
       }
     } catch (error) {
-      console.error('注文取得エラー:', error);
     } finally {
       setLoading(false);
     }
@@ -137,6 +145,7 @@ export default function OrdersPage() {
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">注文ID</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">商品</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">テーブル</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">数量</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">合計金額</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">ステータス</th>
@@ -161,6 +170,15 @@ export default function OrdersPage() {
                             {order.product?.name || '商品情報なし'}
                           </span>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {order.table ? (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            テーブル {order.table.table_number}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-500">なし</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">{order.quantity}</td>
                       <td className="px-6 py-4 text-sm font-semibold text-gray-900">

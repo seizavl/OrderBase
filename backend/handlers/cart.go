@@ -174,6 +174,27 @@ func CheckoutCart(c *gin.Context, db *gorm.DB) {
 	session := sessions.Default(c)
 	sessionID := GetOrCreateSessionID(c)
 
+	// リクエストボディからテーブルIDを取得（オプショナル）
+	var req struct {
+		TableID *uint `json:"table_id"`
+	}
+	// リクエストボディがない場合もエラーにしない
+	c.ShouldBindJSON(&req)
+
+	// テーブルIDが指定されている場合、テーブルが存在するか確認
+	if req.TableID != nil {
+		var table models.Table
+		if err := db.First(&table, *req.TableID).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "指定されたテーブルが見つかりません"})
+			return
+		}
+		// テーブルがアクティブかチェック
+		if table.Status != "active" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "指定されたテーブルは現在使用できません"})
+			return
+		}
+	}
+
 	// ユーザーIDを取得（ログインしていればセット、していなければnil）
 	var userID *uint
 	if uid := session.Get("user_id"); uid != nil {
@@ -209,11 +230,12 @@ func CheckoutCart(c *gin.Context, db *gorm.DB) {
 	// カート内の各商品を注文に変換
 	for _, item := range cartItems {
 		order := models.Order{
-			UserID:     userID, // nilでもOK（ゲスト購入）
+			UserID:     userID,      // nilでもOK（ゲスト購入）
 			ProductID:  item.ProductID,
 			Quantity:   item.Quantity,
 			TotalPrice: item.Product.Price * item.Quantity,
 			Status:     "pending",
+			TableID:    req.TableID, // テーブルID（オプショナル）
 		}
 
 		if err := tx.Create(&order).Error; err != nil {
